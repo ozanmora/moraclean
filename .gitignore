@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Claude Code yerel çalışma alanı
+.claude/
+
+# Xcode (proje dosyası project.yml'den XcodeGen ile üretilir)
+MoraClean.xcodeproj/
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
