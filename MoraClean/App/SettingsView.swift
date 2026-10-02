@@ -41,9 +41,11 @@ struct SettingsView: View {
                 Text("Turning this off makes scans faster, but Homebrew may not know about the newest versions yet.")
                     .font(.caption).foregroundStyle(.secondary)
             }
+            SupportSection()
         }
         .formStyle(.grouped)
-        .frame(width: 480)
+        // Tüm bölümler kaydırmadan görünsün.
+        .frame(width: 480, height: 580)
         .padding(.vertical, 8)
     }
 }

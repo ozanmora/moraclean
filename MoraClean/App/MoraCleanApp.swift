@@ -13,6 +13,7 @@ struct MoraCleanApp: App {
                 .frame(minWidth: 860, minHeight: 560)
         }
         .windowResizability(.contentMinSize)
+        .commands { SupportCommands() }
 
         Settings {
             SettingsView()
