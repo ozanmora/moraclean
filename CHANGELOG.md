@@ -2,6 +2,11 @@
 
 Biçim [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/), sürümleme [SemVer](https://semver.org/lang/tr/).
 
+## [0.1.1] - 2026-10-02
+
+### Eklendi
+- MIT lisansı (`LICENSE`); README'ye lisans bölümü, indirilebilir pakete LICENSE dosyası.
+
 ## [0.1.0] - 2026-10-02
 
 ### Eklendi
