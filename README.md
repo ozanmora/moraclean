@@ -1,111 +1,114 @@
 # MoraClean
 
-macOS için tamamen yerel çalışan bakım uygulaması: gereksiz dosyaları temizler, kurulu uygulamaların güncellemelerini
-bulur ve tek tek ya da toplu olarak günceller. Hesap, abonelik, telemetri ya da analitik yoktur.
+A maintenance app for macOS that runs entirely on your Mac. It cleans up unneeded files, finds updates for your installed
+apps, and installs them one by one or all at once. No account, no subscription, no telemetry, no analytics.
 
-## İndirme ve kurulum
+> The app's interface is currently in Turkish. Button names below are given in English with the Turkish label in
+> parentheses.
 
-1. [Releases](../../releases/latest) sayfasından `MoraClean-<sürüm>.zip` dosyasını indirin (Apple Silicon ve Intel için tek dosya).
-2. Arşivi açın, `MoraClean.app` dosyasını **Uygulamalar** klasörüne taşıyın.
-3. İlk açılış: uygulama Apple noter onayından (notarization) geçmediği için macOS ilk açılışı engeller.
-   Bir kez açmayı deneyin, ardından **Sistem Ayarları › Gizlilik ve Güvenlik** bölümünde MoraClean için
-   **Yine de Aç** düğmesine basın.
+## Download and install
 
-İndirilen dosyanın bütünlüğünü sürüm notlarındaki SHA-256 değeriyle karşılaştırabilirsiniz:
+1. Download `MoraClean-<version>.zip` from the [Releases](../../releases/latest) page (one universal build for Apple
+   Silicon and Intel).
+2. Unzip it and move `MoraClean.app` to your **Applications** folder.
+3. First launch: the app is not notarized by Apple, so macOS blocks it the first time you open it. Try to open it once,
+   then click **Open Anyway** for MoraClean in **System Settings › Privacy & Security**.
+
+You can check the download against the SHA-256 value in the release notes:
 
 ```bash
-shasum -a 256 MoraClean-<sürüm>.zip
+shasum -a 256 MoraClean-<version>.zip
 ```
 
-## Özellikler
+## Features
 
-### Temizlik
+### Cleanup
 
-| Kategori | Konum | Varsayılan |
+| Category | Location | Default |
 |---|---|---|
-| Kullanıcı önbellekleri | `~/Library/Caches` | seçili |
-| Günlük dosyaları | `~/Library/Logs` | seçili |
-| Xcode artıkları | `~/Library/Developer` altındaki DerivedData, DeviceSupport ve simülatör önbellekleri | seçili |
-| Geliştirici önbellekleri | `~/.npm/_cacache`, `~/.composer/cache`, `~/.cache/composer`, `~/.gradle/caches`, `~/.yarn/berry/cache`, `~/.cargo/registry/cache` | seçili |
-| Çöp Kutusu | `~/.Trash` (her zaman kalıcı silinir) | seçili değil |
-| Kurulum dosyaları | `~/Downloads` içindeki `.dmg .pkg .mpkg .xip` dosyaları | seçili değil |
+| User caches | `~/Library/Caches` | selected |
+| Log files | `~/Library/Logs` | selected |
+| Xcode leftovers | DerivedData, DeviceSupport and simulator caches under `~/Library/Developer` | selected |
+| Developer caches | `~/.npm/_cacache`, `~/.composer/cache`, `~/.cache/composer`, `~/.gradle/caches`, `~/.yarn/berry/cache`, `~/.cargo/registry/cache` | selected |
+| Trash | `~/.Trash` (always deleted permanently) | not selected |
+| Installer files | `.dmg .pkg .mpkg .xip` files in `~/Downloads` | not selected |
 
-- Tarama yalnızca okur; hiçbir şey onayınız olmadan silinmez.
-- Varsayılan olarak dosyalar **Çöp Kutusuna taşınır** (geri alınabilir). Ayarlar'dan kalıcı silmeye geçilebilir.
-- Uygulama yalnızca yukarıdaki klasörlerin **doğrudan alt öğelerini** silebilir; başka bir yol kod düzeyinde reddedilir.
+- Scanning only reads. Nothing is deleted until you confirm.
+- By default, files are **moved to the Trash**, so you can undo. You can switch to permanent deletion in Settings.
+- The app can only delete the **direct children** of the folders above. Any other path is rejected in code.
 
-### Güncelleyici
+### Updater
 
-`/Applications` ve `~/Applications` taranır (macOS ile gelen sistem uygulamaları hariç). Her uygulamanın güncelleme
-kaynağı sırayla aranır:
+MoraClean scans `/Applications` and `~/Applications`, skipping the system apps that ship with macOS. For each app it looks
+for an update source in this order:
 
-1. **Homebrew cask** — uygulama Homebrew ile kurulduysa `brew upgrade --cask` ile güncellenir.
-2. **Mac App Store** — sürüm bilgisi Apple'ın herkese açık arama servisinden alınır. Komut satırı aracı
-   `mas` kuruluysa doğrudan güncellenir, değilse uygulamanın App Store sayfası açılır.
-3. **Sparkle akışı** — uygulama kendi güncelleme akışını (`SUFeedURL`) yayınlıyorsa yeni sürüm indirilir ve kurulur.
+1. **Homebrew cask:** if the app was installed with Homebrew, it is updated with `brew upgrade --cask`.
+2. **Mac App Store:** the latest version number comes from Apple's public lookup service. If the `mas` command-line tool
+   is installed, the app is updated directly. Otherwise the app's App Store page opens.
+3. **Sparkle feed:** if the app publishes its own update feed (`SUFeedURL`), the new version is downloaded and installed.
 
-Tek tek, seçilenleri ya da tümünü güncelleyebilir; istemediğiniz uygulamayı sağ tık › *Bu Uygulamayı Yoksay* ile
-listeden çıkarabilirsiniz.
+You can update apps one by one, update the selected ones, or update them all. To hide an app from the list, right-click
+it and choose *Ignore This App* (*Bu Uygulamayı Yoksay*).
 
-## İzinler ve erişimler
+## Permissions and access
 
-MoraClean sandbox dışında çalışır (önbellek klasörlerine ve `/Applications`'a erişebilmek için). Aşağıda uygulamanın
-istediği ya da macOS'un sorabileceği **tüm** izinler ve nedenleri listelenmiştir.
+MoraClean runs outside the App Sandbox so it can reach cache folders and `/Applications`. This section lists **every**
+permission the app asks for or that macOS may ask for, and why.
 
-### macOS izinleri
+### macOS permissions
 
-| İzin | Ne zaman istenir | Neden | Vermezseniz |
+| Permission | When it is requested | Why | If you deny it |
 |---|---|---|---|
-| **İndirilenler klasörüne erişim** | Temizlik taramasında; macOS ilk seferde sorar | "Kurulum Dosyaları" kategorisi `~/Downloads` içindeki `.dmg/.pkg/.xip` dosyalarını listeler | Bu kategori boş görünür, diğerleri çalışır |
-| **Tam Disk Erişimi** (isteğe bağlı) | Siz vermediğiniz sürece hiç istenmez; uygulama yalnızca uyarı gösterir | Çöp Kutusu (`~/.Trash`) ve macOS'un koruduğu bazı önbellek klasörleri bu izin olmadan okunamaz | Bu klasörler "İzin gerekli" olarak işaretlenir ve atlanır |
-| **Uygulama Yönetimi** | Bir uygulamayı güncellerken, macOS gerekli görürse | macOS, başka bir geliştiricinin uygulamasını değiştiren programlardan bu izni isteyebilir | O uygulamanın güncellemesi başarısız olur |
-| **Yönetici şifresi** | Yalnızca bir Homebrew ya da `mas` güncellemesi yönetici yetkisi isterse | Sistem genelinde kurulum yapan paketler `sudo` gerektirir | O güncelleme başarısız olur |
+| **Access to the Downloads folder** | During a cleanup scan; macOS asks the first time | The "Installer files" category lists `.dmg/.pkg/.xip` files in `~/Downloads` | That category stays empty; the others still work |
+| **Full Disk Access** (optional) | Never requested unless you grant it; the app only shows a notice | The Trash (`~/.Trash`) and some cache folders that macOS protects cannot be read without it | Those folders are marked "Permission required" (*İzin gerekli*) and skipped |
+| **App Management** | While updating an app, if macOS requires it | macOS may require this permission for programs that modify apps from another developer | That app's update fails |
+| **Administrator password** | Only if a Homebrew or `mas` update needs admin rights | Packages that install system-wide require `sudo` | That update fails |
 
-Tam Disk Erişimi vermek için: **Sistem Ayarları › Gizlilik ve Güvenlik › Tam Disk Erişimi** › MoraClean'i ekleyin,
-ardından uygulamayı yeniden başlatın.
+To grant Full Disk Access, add MoraClean under **System Settings › Privacy & Security › Full Disk Access**, then restart
+the app.
 
-**Yönetici şifresi hakkında:** Şifre, macOS'un kendi iletişim kutusuyla (`osascript`) sorulur ve doğrudan `sudo`
-sürecine iletilir. MoraClean şifreyi kaydetmez, günlüğe yazmaz ve hiçbir yere göndermez. Bu iletişim kutusunu açan küçük
-betik `~/Library/Application Support/MoraClean/askpass.sh` konumuna yalnızca sizin okuyabileceğiniz izinle (0700) yazılır.
+**About the administrator password:** the password is requested through a standard macOS dialog (`osascript`) and passed
+straight to the `sudo` process. MoraClean does not store it, log it, or send it anywhere. The small script that shows the
+dialog is written to `~/Library/Application Support/MoraClean/askpass.sh` with permissions that only you can read (0700).
 
-### Ağ bağlantıları
+### Network connections
 
-Uygulama yalnızca siz **Tara** ya da **Güncelle** düğmesine bastığınızda ağa çıkar:
+The app only goes online when you click **Scan** (*Tara*) or **Update** (*Güncelle*):
 
-| Hedef | Amaç |
+| Destination | Purpose |
 |---|---|
-| `itunes.apple.com` | App Store uygulamalarının güncel sürüm numarasını sorgulamak (yalnızca paket kimlikleri gönderilir) |
-| Her uygulamanın kendi güncelleme akışı ve indirme adresi | Sparkle ile güncellenen uygulamaların yeni sürümünü kontrol etmek ve indirmek |
-| Homebrew'un kendi sunucuları | `brew update` / `brew upgrade` komutları üzerinden (Homebrew'un kendi davranışı) |
+| `itunes.apple.com` | Look up the latest version of App Store apps (only bundle identifiers are sent) |
+| Each app's own update feed and download URL | Check for and download new versions of apps updated through Sparkle |
+| Homebrew's own servers | Through the `brew update` / `brew upgrade` commands (Homebrew's own behavior) |
 
-Kullanım verisi, cihaz bilgisi ya da kişisel veri hiçbir yere gönderilmez.
+No usage data, device information or personal data is sent anywhere.
 
-### Dosya sistemi ve diğer işlemler
+### File system and other actions
 
-- **Okuma:** Temizlik tablosundaki klasörler; `/Applications` ve `~/Applications` içindeki uygulamaların `Info.plist`
-  dosyaları.
-- **Silme / Çöp Kutusuna taşıma:** Yalnızca temizlik tablosundaki klasörlerin doğrudan alt öğeleri ve yalnızca siz
-  onayladıktan sonra. Güncellenen uygulamanın eski sürümü Çöp Kutusuna taşınır.
-- **Yazma:** Ayarlar (`~/Library/Preferences/works.mora.moraclean.plist`), yukarıdaki `askpass.sh` betiği ve indirmeler
-  için geçici klasör (işlem bitince silinir).
-- **Uygulamaları kapatma:** Sparkle ile güncellenen uygulama açıksa kapatma isteği gönderilir, güncellemeden sonra
-  yeniden açılır.
-- **Çalıştırılan komutlar:** `brew`, `mas`, `/usr/bin/ditto`, `/usr/bin/tar`, `/usr/bin/hdiutil`, `/usr/bin/codesign`,
-  `/usr/bin/osascript` (yalnızca şifre iletişim kutusu için).
+- **Reads:** the folders in the cleanup table, and the `Info.plist` files of apps in `/Applications` and
+  `~/Applications`.
+- **Deletes or moves to the Trash:** only the direct children of the folders in the cleanup table, and only after you
+  confirm. When an app is updated, its old version is moved to the Trash.
+- **Writes:** settings (`~/Library/Preferences/works.mora.moraclean.plist`), the `askpass.sh` script above, and a temporary
+  folder for downloads (deleted when the job finishes).
+- **Quits apps:** if an app being updated through Sparkle is running, MoraClean asks it to quit and reopens it after the
+  update.
+- **Commands it runs:** `brew`, `mas`, `/usr/bin/ditto`, `/usr/bin/tar`, `/usr/bin/hdiutil`, `/usr/bin/codesign`,
+  `/usr/bin/osascript` (only for the password dialog).
 
-### Güncelleme güvenliği
+### Update safety
 
-Sparkle kaynağından gelen bir güncelleme kurulmadan önce:
+Before an update from a Sparkle source is installed:
 
-1. Uygulama bir EdDSA anahtarı (`SUPublicEDKey`) yayınlıyorsa indirilen dosyanın imzası doğrulanır; imza yoksa ya da
-   geçersizse kurulum durur.
-2. Yeni sürümün kod imzası `codesign --verify --deep --strict` ile kontrol edilir.
-3. Yeni sürümün geliştirici kimliği (Team ID) kurulu sürümle aynı olmalıdır.
-4. Bir adım başarısız olursa eski sürüm yerinde kalır.
+1. If the app publishes an EdDSA key (`SUPublicEDKey`), the downloaded file's signature is verified. If the signature is
+   missing or invalid, installation stops.
+2. The new version's code signature is checked with `codesign --verify --deep --strict`.
+3. The new version's developer identity (Team ID) must match the installed version.
+4. If any step fails, the old version stays in place.
 
-## Kaynaktan derleme
+## Building from source
 
-Gereksinimler: macOS 14 Sonoma veya üzeri, Xcode 16+, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+Requirements: macOS 14 Sonoma or later, Xcode 16+, [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```bash
 brew install xcodegen
@@ -114,31 +117,31 @@ xcodebuild -project MoraClean.xcodeproj -scheme MoraClean -configuration Release
 open build/DerivedData/Build/Products/Release/MoraClean.app
 ```
 
-Testler:
+Tests:
 
 ```bash
 xcodebuild -project MoraClean.xcodeproj -scheme MoraClean -derivedDataPath build/DerivedData test
 ```
 
-## Proje yapısı
+## Project structure
 
 ```
 MoraClean/
-  App/       Uygulama girişi, kenar çubuğu, ayarlar
-  Core/      Komut çalıştırıcı, sürüm karşılaştırma, biçimlendirme
-  Cleaner/   Temizlik kategorileri, tarama/silme motoru, arayüz
-  Updater/   Uygulama envanteri, Homebrew / App Store / Sparkle kaynakları, kurulum, arayüz
+  App/       App entry point, sidebar, settings
+  Core/      Command runner, version comparison, formatting
+  Cleaner/   Cleanup categories, scan/delete engine, UI
+  Updater/   App inventory, Homebrew / App Store / Sparkle sources, installer, UI
 MoraCleanTests/
-tools/make-icon.swift   Uygulama ikonunu üretir (geometrik çizim)
+tools/make-icon.swift   Generates the app icon (geometric drawing)
 ```
 
-## Lisans
+## License
 
 [MIT](LICENSE) © 2026 Ozan Mora
 
-## Marka notu
+## Trademarks
 
-MoraClean bağımsız bir projedir; adı geçen hiçbir şirket ya da projeyle bağlantılı değildir ve onlar tarafından
-desteklenmez. Apple, macOS, Mac App Store ve Xcode, Apple Inc.'in ticari markalarıdır. Homebrew, Sparkle, `mas`, npm,
-Composer, Gradle, Yarn ve Cargo adları yalnızca birlikte çalışılan araçları belirtmek için kullanılır ve ilgili
-sahiplerine aittir.
+MoraClean is an independent project. It is not affiliated with, endorsed by, or sponsored by any company or project
+mentioned here. Apple, macOS, Mac App Store and Xcode are trademarks of Apple Inc. Homebrew, Sparkle, `mas`, npm,
+Composer, Gradle, Yarn and Cargo are named only to identify the tools MoraClean works with, and belong to their
+respective owners.
