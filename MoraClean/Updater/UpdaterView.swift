@@ -20,7 +20,7 @@ struct UpdaterView: View {
             Divider()
             footer
         }
-        .navigationTitle("Güncellemeler")
+        .navigationTitle("Updates")
     }
 
     private var header: some View {
@@ -31,7 +31,7 @@ struct UpdaterView: View {
                 .frame(width: 64, height: 64)
                 .background(LinearGradient(colors: [.teal, .blue], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 16))
             VStack(alignment: .leading, spacing: 4) {
-                Text("Uygulama Güncelleyici").font(.title2.bold())
+                Text("App Updater").font(.title2.bold())
                 Text(subtitle).foregroundStyle(.secondary).lineLimit(2)
             }
             Spacer()
@@ -39,7 +39,7 @@ struct UpdaterView: View {
             Button {
                 Task { await model.scan(updateHomebrew: brewUpdateBeforeScan) }
             } label: {
-                Label(model.entries.isEmpty ? "Tara" : "Yeniden Tara", systemImage: "magnifyingglass")
+                Label(model.entries.isEmpty ? "Scan" : "Scan Again", systemImage: "magnifyingglass")
             }
             .controlSize(.large)
             .disabled(model.isBusy)
@@ -49,23 +49,23 @@ struct UpdaterView: View {
 
     private var subtitle: String {
         if model.isScanning { return model.statusText }
-        if model.isUpdating { return "Güncelleniyor…" }
-        if model.entries.isEmpty { return "Homebrew, Mac App Store ve Sparkle kaynaklarından güncellemeleri bulur." }
+        if model.isUpdating { return String(localized: "Updating…") }
+        if model.entries.isEmpty { return String(localized: "Finds updates from Homebrew, the Mac App Store and Sparkle feeds.") }
         let count = model.available.count
-        var text = count == 0 ? "Tüm uygulamalar güncel." : "\(count) uygulama için güncelleme var."
+        var text = count == 0 ? String(localized: "All apps are up to date.") : String(localized: "Updates are available for \(count) apps.")
         if let date = model.lastScan {
-            text += " Son tarama: \(date.formatted(date: .omitted, time: .shortened))"
+            text += " " + String(localized: "Last scan: \(date.formatted(date: .omitted, time: .shortened))")
         }
         return text
     }
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("Güncellemeleri kontrol edin", systemImage: "arrow.down.app")
+            Label("Check for updates", systemImage: "arrow.down.app")
         } description: {
-            Text("/Applications ve ~/Applications taranır; her uygulamanın güncelleme kaynağı otomatik bulunur.")
+            Text("Scans /Applications and ~/Applications and finds each app's update source automatically.")
         } actions: {
-            Button("Taramayı Başlat") { Task { await model.scan(updateHomebrew: brewUpdateBeforeScan) } }
+            Button("Start Scan") { Task { await model.scan(updateHomebrew: brewUpdateBeforeScan) } }
                 .buttonStyle(.borderedProminent)
                 .disabled(model.isBusy)
         }
@@ -75,25 +75,25 @@ struct UpdaterView: View {
     private var list: some View {
         List {
             if !Homebrew.isAvailable {
-                Label("Homebrew bulunamadı; cask ile kurulan uygulamalar Sparkle/App Store üzerinden kontrol ediliyor.", systemImage: "info.circle")
+                Label("Homebrew was not found; apps installed as casks are checked through Sparkle or the App Store.", systemImage: "info.circle")
                     .foregroundStyle(.secondary)
             }
-            Section("Güncelleme Var (\(model.available.count))") {
+            Section("Updates Available (\(model.available.count))") {
                 if model.available.isEmpty {
-                    Text(model.isScanning ? "Kontrol ediliyor…" : "Bekleyen güncelleme yok.").foregroundStyle(.secondary)
+                    Text(model.isScanning ? "Checking…" : "No pending updates.").foregroundStyle(.secondary)
                 }
                 ForEach(model.available) { entry in
                     UpdateRow(entry: entry, selectable: true)
                 }
             }
-            Section("Güncel (\(model.upToDate.count))", isExpanded: $showUpToDate) {
+            Section("Up to Date (\(model.upToDate.count))", isExpanded: $showUpToDate) {
                 ForEach(model.upToDate) { UpdateRow(entry: $0, selectable: false) }
             }
-            Section("Kontrol Edilemeyenler (\(model.unsupported.count))", isExpanded: $showUnsupported) {
+            Section("Could Not Check (\(model.unsupported.count))", isExpanded: $showUnsupported) {
                 ForEach(model.unsupported) { UpdateRow(entry: $0, selectable: false) }
             }
             if !model.ignored.isEmpty {
-                Section("Yoksayılanlar (\(model.ignored.count))", isExpanded: $showIgnored) {
+                Section("Ignored (\(model.ignored.count))", isExpanded: $showIgnored) {
                     ForEach(model.ignored) { UpdateRow(entry: $0, selectable: false) }
                 }
             }
@@ -105,11 +105,11 @@ struct UpdaterView: View {
     private var footer: some View {
         let selectedCount = model.available.filter { model.selectedIDs.contains($0.id) }.count
         return HStack {
-            Text("\(selectedCount) / \(model.available.count) seçili").foregroundStyle(.secondary)
+            Text("\(selectedCount) of \(model.available.count) selected").foregroundStyle(.secondary)
             Spacer()
-            Button("Seçilenleri Güncelle") { Task { await model.updateSelected() } }
+            Button("Update Selected") { Task { await model.updateSelected() } }
                 .disabled(model.isBusy || selectedCount == 0)
-            Button("Tümünü Güncelle") { Task { await model.updateAll() } }
+            Button("Update All") { Task { await model.updateAll() } }
                 .buttonStyle(.borderedProminent)
                 .disabled(model.isBusy || model.available.isEmpty)
         }
@@ -152,11 +152,11 @@ private struct UpdateRow: View {
         }
         .padding(.vertical, 4)
         .contextMenu {
-            Button("Finder'da Göster") { NSWorkspace.shared.activateFileViewerSelecting([entry.app.url]) }
+            Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([entry.app.url]) }
             if model.isIgnored(entry) {
-                Button("Yoksaymayı Kaldır") { model.setIgnored(entry, false) }
+                Button("Stop Ignoring") { model.setIgnored(entry, false) }
             } else {
-                Button("Bu Uygulamayı Yoksay") { model.setIgnored(entry, true) }
+                Button("Ignore This App") { model.setIgnored(entry, true) }
             }
         }
     }
@@ -180,7 +180,7 @@ private struct UpdateRow: View {
         case .checking:
             ProgressView().controlSize(.small)
         case .available:
-            Button("Güncelle") { Task { await model.update(ids: [entry.id]) } }
+            Button("Update") { Task { await model.update(ids: [entry.id]) } }
                 .disabled(model.isBusy)
         case let .updating(line):
             HStack(spacing: 8) {
@@ -188,19 +188,19 @@ private struct UpdateRow: View {
                 ProgressView().controlSize(.small)
             }
         case .upToDate:
-            Label("Güncel", systemImage: "checkmark.circle.fill").foregroundStyle(.green).labelStyle(.iconOnly).help("Güncel")
+            Label("Up to date", systemImage: "checkmark.circle.fill").foregroundStyle(.green).labelStyle(.iconOnly).help("Up to date")
         case .updated:
-            Label("Güncellendi", systemImage: "checkmark.seal.fill").foregroundStyle(.green)
+            Label("Updated", systemImage: "checkmark.seal.fill").foregroundStyle(.green)
         case let .failed(reason):
             HStack(spacing: 8) {
-                Label("Başarısız", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).help(reason)
-                Button("Tekrar") { Task { await model.update(ids: [entry.id]) } }.disabled(model.isBusy)
+                Label("Failed", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).help(reason)
+                Button("Retry") { Task { await model.update(ids: [entry.id]) } }.disabled(model.isBusy)
             }
             .frame(maxWidth: 260, alignment: .trailing)
         case let .handedOff(message):
             Label(message, systemImage: "arrow.up.forward.app").font(.caption).foregroundStyle(.blue).lineLimit(2).frame(maxWidth: 260, alignment: .trailing)
         case .noSource:
-            Text("Güncelleme kaynağı yok").font(.caption).foregroundStyle(.secondary)
+            Text("No update source").font(.caption).foregroundStyle(.secondary)
         case let .checkFailed(reason):
             Text(reason).font(.caption).foregroundStyle(.secondary).lineLimit(1).help(reason).frame(maxWidth: 260, alignment: .trailing)
         }

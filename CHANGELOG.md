@@ -2,6 +2,15 @@
 
 Biçim [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/), sürümleme [SemVer](https://semver.org/lang/tr/).
 
+## [0.2.0] - 2026-10-02
+
+### Eklendi
+- Arayüze İngilizce dil desteği. Geliştirme dili İngilizce, Türkçe tam çeviri olarak String Catalog'da
+  (`MoraClean/Resources/Localizable.xcstrings`); İngilizcede tekil/çoğul biçimleri.
+- Ayarlar'da dil seçimi (Sistem / English / Türkçe) ve "Şimdi Yeniden Başlat" düğmesi.
+- Yönetici şifresi penceresi de seçili dilde; metin AppleScript ve kabuk için güvenli biçimde kaçışlanır.
+- Testler: tüm metinlerin Türkçe çevirisi ve yer tutucu uyumu, paketlenen çeviriler, çoğul biçimleri, kaçışlama.
+
 ## [0.1.1] - 2026-10-02
 
 ### Eklendi

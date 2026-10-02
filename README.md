@@ -3,8 +3,8 @@
 A maintenance app for macOS that runs entirely on your Mac. It cleans up unneeded files, finds updates for your installed
 apps, and installs them one by one or all at once. No account, no subscription, no telemetry, no analytics.
 
-> The app's interface is currently in Turkish. Button names below are given in English with the Turkish label in
-> parentheses.
+The app is available in **English** and **Turkish**. It follows your macOS language by default; you can pick a
+language in **Settings › Language**, or per app in **System Settings › General › Language & Region › Applications**.
 
 ## Download and install
 
@@ -19,6 +19,26 @@ You can check the download against the SHA-256 value in the release notes:
 ```bash
 shasum -a 256 MoraClean-<version>.zip
 ```
+
+## What else you need to install
+
+Cleanup works out of the box. The updater relies on a few other tools for some update sources; install the ones you
+need. MoraClean finds them in `/opt/homebrew/bin` (Apple Silicon) or `/usr/local/bin` (Intel).
+
+| Tool | Needed? | What it enables | Without it | How to install |
+|---|---|---|---|---|
+| [Homebrew](https://brew.sh) | Optional, recommended | Finding and updating apps you installed with Homebrew (`brew upgrade --cask`) | Those apps are only checked if they also have a Sparkle feed or come from the App Store | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
+| [mas](https://github.com/mas-cli/mas) | Optional | Updating Mac App Store apps directly from MoraClean | MoraClean still finds App Store updates, but opens each app's App Store page so you finish the update there | `brew install mas` (needs Homebrew) |
+
+Notes:
+
+- The Homebrew installer asks for your administrator password and installs Apple's Command Line Tools if they are
+  missing.
+- `mas` recommends macOS 14 or later. To update an app with it, you must be signed in to the App Store with the Apple
+  Account that owns the app, and macOS asks for your administrator password.
+- Nothing else is required for cleanup, for checking App Store versions, or for Sparkle updates; those use tools built
+  into macOS (`ditto`, `tar`, `hdiutil`, `codesign`).
+- Apps that were dragged into Applications by hand are not managed by Homebrew, even if Homebrew is installed.
 
 ## Features
 
@@ -48,7 +68,7 @@ for an update source in this order:
 3. **Sparkle feed:** if the app publishes its own update feed (`SUFeedURL`), the new version is downloaded and installed.
 
 You can update apps one by one, update the selected ones, or update them all. To hide an app from the list, right-click
-it and choose *Ignore This App* (*Bu Uygulamayı Yoksay*).
+it and choose *Ignore This App*.
 
 ## Permissions and access
 
@@ -60,7 +80,7 @@ permission the app asks for or that macOS may ask for, and why.
 | Permission | When it is requested | Why | If you deny it |
 |---|---|---|---|
 | **Access to the Downloads folder** | During a cleanup scan; macOS asks the first time | The "Installer files" category lists `.dmg/.pkg/.xip` files in `~/Downloads` | That category stays empty; the others still work |
-| **Full Disk Access** (optional) | Never requested unless you grant it; the app only shows a notice | The Trash (`~/.Trash`) and some cache folders that macOS protects cannot be read without it | Those folders are marked "Permission required" (*İzin gerekli*) and skipped |
+| **Full Disk Access** (optional) | Never requested unless you grant it; the app only shows a notice | The Trash (`~/.Trash`) and some cache folders that macOS protects cannot be read without it | Those folders are marked "Permission required" and skipped |
 | **App Management** | While updating an app, if macOS requires it | macOS may require this permission for programs that modify apps from another developer | That app's update fails |
 | **Administrator password** | Only if a Homebrew or `mas` update needs admin rights | Packages that install system-wide require `sudo` | That update fails |
 
@@ -73,7 +93,7 @@ dialog is written to `~/Library/Application Support/MoraClean/askpass.sh` with p
 
 ### Network connections
 
-The app only goes online when you click **Scan** (*Tara*) or **Update** (*Güncelle*):
+The app only goes online when you click **Scan** or **Update**:
 
 | Destination | Purpose |
 |---|---|
