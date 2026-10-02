@@ -95,7 +95,7 @@ enum Homebrew {
 
     /// `brew upgrade --cask <token>`. Yönetici izni gerekirse SUDO_ASKPASS ile şifre penceresi açılır.
     static func upgrade(token: String, onLine: @escaping @Sendable (String) -> Void) async throws {
-        guard let brew = executable else { throw ShellError.failed(command: "brew", result: ShellResult(status: 127, stdout: "", stderr: "Homebrew bulunamadı.")) }
+        guard let brew = executable else { throw ShellError.failed(command: "brew", result: ShellResult(status: 127, stdout: "", stderr: String(localized: "Homebrew was not found."))) }
         var env = ["HOMEBREW_NO_AUTO_UPDATE": "1", "HOMEBREW_NO_ENV_HINTS": "1", "HOMEBREW_COLOR": "0", "HOMEBREW_NO_EMOJI": "1"]
         if let askpass = try? AskPass.scriptPath() { env["SUDO_ASKPASS"] = askpass }
         try await Shell.runChecked(brew, ["upgrade", "--cask", "--greedy", token], environment: env, onLine: onLine)
@@ -110,19 +110,28 @@ enum AskPass {
             .appendingPathComponent("MoraClean", isDirectory: true)
         try fm.createDirectory(at: dir, withIntermediateDirectories: true)
         let script = dir.appendingPathComponent("askpass.sh")
+        let message = String(localized: "MoraClean needs your administrator password to install this update.")
+        let title = String(localized: "MoraClean – Administrator Permission")
         let body = """
         #!/bin/sh
-        # MoraClean: Homebrew'un sudo ile istediği yönetici şifresini macOS penceresiyle sorar.
+        # MoraClean: sudo'nun istediği yönetici şifresini macOS iletişim kutusuyla sorar.
         exec /usr/bin/osascript \\
-          -e 'on run argv' \\
-          -e 'set msg to "Homebrew bu güncelleme için yönetici şifrenizi istiyor."' \\
-          -e 'text returned of (display dialog msg default answer "" with hidden answer with title "MoraClean – Yönetici izni" with icon caution)' \\
-          -e 'end run'
+          -e \(shellQuoted("text returned of (display dialog \(appleScriptString(message)) default answer \"\" with hidden answer with title \(appleScriptString(title)) with icon caution)"))
         """
         if (try? String(contentsOf: script, encoding: .utf8)) != body {
             try body.write(to: script, atomically: true, encoding: .utf8)
         }
         try fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: script.path)
         return script.path
+    }
+
+    /// AppleScript çift tırnaklı metin değişmezi.
+    static func appleScriptString(_ text: String) -> String {
+        "\"" + text.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\""
+    }
+
+    /// Kabuk için tek tırnaklı argüman.
+    static func shellQuoted(_ text: String) -> String {
+        "'" + text.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 }

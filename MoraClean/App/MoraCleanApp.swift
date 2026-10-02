@@ -27,8 +27,8 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .cleaner: "Temizlik"
-        case .updater: "Güncellemeler"
+        case .cleaner: String(localized: "Cleanup")
+        case .updater: String(localized: "Updates")
         }
     }
 
@@ -66,9 +66,9 @@ private struct DiskUsageView: View {
     var body: some View {
         if let total = DiskSpace.total(), let free = DiskSpace.available(), total > 0 {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Başlangıç Diski").font(.caption.weight(.semibold))
+                Text("Startup Disk").font(.caption.weight(.semibold))
                 ProgressView(value: Double(total - free), total: Double(total))
-                Text("\(Bytes.format(free)) boş / \(Bytes.format(total))").font(.caption2).foregroundStyle(.secondary)
+                Text("\(Bytes.format(free)) free of \(Bytes.format(total))").font(.caption2).foregroundStyle(.secondary)
             }
         }
     }

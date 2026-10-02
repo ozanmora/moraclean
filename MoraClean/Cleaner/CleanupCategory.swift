@@ -22,6 +22,8 @@ struct CleanupCategory: Identifiable, Sendable {
     /// Çöp Kutusu gibi, ayardan bağımsız olarak her zaman kalıcı silinen kategoriler.
     let alwaysPermanent: Bool
     let targets: [CleanupTarget]
+    /// Öğeler ait oldukları uygulamaya göre gruplanır (ikon ve uygulama adıyla).
+    var groupsByApp = false
 }
 
 extension CleanupCategory {
@@ -33,17 +35,18 @@ extension CleanupCategory {
         return [
             CleanupCategory(
                 id: .userCaches,
-                title: "Kullanıcı Önbellekleri",
-                subtitle: "Uygulamaların yeniden oluşturabildiği geçici dosyalar (~/Library/Caches)",
+                title: String(localized: "User Caches"),
+                subtitle: String(localized: "Temporary files that apps can recreate (~/Library/Caches)"),
                 symbol: "internaldrive",
                 selectedByDefault: true,
                 alwaysPermanent: false,
-                targets: [CleanupTarget(root: library.appendingPathComponent("Caches"), excludedNames: [ownBundleID])]
+                targets: [CleanupTarget(root: library.appendingPathComponent("Caches"), excludedNames: [ownBundleID])],
+                groupsByApp: true
             ),
             CleanupCategory(
                 id: .userLogs,
-                title: "Günlük Dosyaları",
-                subtitle: "Uygulama ve tanılama günlükleri (~/Library/Logs)",
+                title: String(localized: "Log Files"),
+                subtitle: String(localized: "App and diagnostic logs (~/Library/Logs)"),
                 symbol: "doc.text.magnifyingglass",
                 selectedByDefault: true,
                 alwaysPermanent: false,
@@ -51,8 +54,8 @@ extension CleanupCategory {
             ),
             CleanupCategory(
                 id: .xcode,
-                title: "Xcode Artıkları",
-                subtitle: "DerivedData, cihaz destek dosyaları ve simülatör önbellekleri",
+                title: String(localized: "Xcode Leftovers"),
+                subtitle: String(localized: "DerivedData, device support files and simulator caches"),
                 symbol: "hammer",
                 selectedByDefault: true,
                 alwaysPermanent: false,
@@ -66,8 +69,8 @@ extension CleanupCategory {
             ),
             CleanupCategory(
                 id: .developerCaches,
-                title: "Geliştirici Önbellekleri",
-                subtitle: "npm, Composer, Gradle, Yarn ve Cargo paket önbellekleri",
+                title: String(localized: "Developer Caches"),
+                subtitle: String(localized: "npm, Composer, Gradle, Yarn and Cargo package caches"),
                 symbol: "shippingbox",
                 selectedByDefault: true,
                 alwaysPermanent: false,
@@ -82,8 +85,8 @@ extension CleanupCategory {
             ),
             CleanupCategory(
                 id: .trash,
-                title: "Çöp Kutusu",
-                subtitle: "Çöp Kutusu'ndaki öğeler kalıcı olarak silinir",
+                title: String(localized: "Trash"),
+                subtitle: String(localized: "Items in the Trash are deleted permanently"),
                 symbol: "trash",
                 selectedByDefault: false,
                 alwaysPermanent: true,
@@ -91,8 +94,8 @@ extension CleanupCategory {
             ),
             CleanupCategory(
                 id: .downloadInstallers,
-                title: "Kurulum Dosyaları",
-                subtitle: "İndirilenler klasöründeki .dmg, .pkg ve .xip dosyaları",
+                title: String(localized: "Installer Files"),
+                subtitle: String(localized: ".dmg, .pkg and .xip files in your Downloads folder"),
                 symbol: "arrow.down.app",
                 selectedByDefault: false,
                 alwaysPermanent: false,

@@ -13,6 +13,7 @@ final class CleanerModel {
     private(set) var results: [CleanupCategory.ID: CategoryScanResult] = [:]
     private(set) var lastReport: CleanupReport?
     var selectedItemIDs: Set<String> = []
+    let tree = FileTreeStore()
 
     init(categories: [CleanupCategory] = CleanupCategory.all()) {
         self.categories = categories
@@ -49,6 +50,19 @@ final class CleanerModel {
         return selected == ids.count ? true : nil
     }
 
+    /// Bir öğe kümesinin seçim durumu: `nil` = kısmi seçim.
+    func selectionState(of items: [CleanupItem]) -> Bool? {
+        guard !items.isEmpty else { return false }
+        let selected = items.filter { selectedItemIDs.contains($0.id) }.count
+        if selected == 0 { return false }
+        return selected == items.count ? true : nil
+    }
+
+    func set(_ items: [CleanupItem], selected: Bool) {
+        let ids = items.map(\.id)
+        if selected { selectedItemIDs.formUnion(ids) } else { selectedItemIDs.subtract(ids) }
+    }
+
     func setCategory(_ category: CleanupCategory.ID, selected: Bool) {
         let ids = items(in: category).map(\.id)
         if selected { selectedItemIDs.formUnion(ids) } else { selectedItemIDs.subtract(ids) }
@@ -63,6 +77,7 @@ final class CleanerModel {
         phase = .scanning
         results = [:]
         selectedItemIDs = []
+        tree.reset()
         lastReport = nil
         await withTaskGroup(of: CategoryScanResult.self) { group in
             for category in categories {

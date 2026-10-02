@@ -19,17 +19,17 @@ enum InstallError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .missingDownload: "Appcast'te indirme bağlantısı yok."
-        case let .downloadFailed(code): "İndirme başarısız (HTTP \(code))."
-        case .missingSignature: "Uygulama EdDSA imzası bekliyor ama güncellemede imza yok; güvenlik nedeniyle kurulmadı."
-        case .invalidSignature: "İndirilen dosyanın EdDSA imzası geçersiz; güvenlik nedeniyle kurulmadı."
-        case let .unsupportedArchive(ext): "Desteklenmeyen arşiv biçimi: .\(ext)"
-        case .appNotFoundInArchive: "Arşivde aynı paket kimliğine sahip uygulama bulunamadı."
-        case let .codeSignatureInvalid(reason): "Yeni sürümün kod imzası doğrulanamadı: \(reason)"
-        case let .teamMismatch(expected, found): "Geliştirici kimliği uyuşmuyor (beklenen \(expected), bulunan \(found ?? "yok")); kurulmadı."
-        case .appStillRunning: "Uygulama kapatılamadı. Kapatıp tekrar deneyin."
-        case let .replaceFailed(reason): "Uygulama değiştirilemedi: \(reason)"
-        case .handedOffToInstaller: "Kurulum paketi Yükleyici'de açıldı; adımları tamamlayın."
+        case .missingDownload: String(localized: "The appcast has no download link.")
+        case let .downloadFailed(code): String(localized: "Download failed (HTTP \(code)).")
+        case .missingSignature: String(localized: "The app expects an EdDSA signature but the update has none; it was not installed for safety.")
+        case .invalidSignature: String(localized: "The downloaded file has an invalid EdDSA signature; it was not installed for safety.")
+        case let .unsupportedArchive(ext): String(localized: "Unsupported archive format: .\(ext)")
+        case .appNotFoundInArchive: String(localized: "The archive contains no app with the same bundle identifier.")
+        case let .codeSignatureInvalid(reason): String(localized: "Could not verify the new version's code signature: \(reason)")
+        case let .teamMismatch(expected, found): String(localized: "The developer identity does not match (expected \(expected), found \(found ?? String(localized: "none"))); it was not installed.")
+        case .appStillRunning: String(localized: "The app could not be quit. Quit it and try again.")
+        case let .replaceFailed(reason): String(localized: "Could not replace the app: \(reason)")
+        case .handedOffToInstaller: String(localized: "The installer package was opened in Installer; complete the steps there.")
         }
     }
 }
@@ -44,7 +44,7 @@ enum SparkleInstaller {
         try fm.createDirectory(at: work, withIntermediateDirectories: true)
         defer { try? fm.removeItem(at: work) }
 
-        progress("İndiriliyor…")
+        progress(String(localized: "Downloading…"))
         let (temp, response) = try await URLSession.shared.download(from: downloadURL)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
             throw InstallError.downloadFailed(http.statusCode)
@@ -53,7 +53,7 @@ enum SparkleInstaller {
         let archive = work.appendingPathComponent(fileName.isEmpty ? "update" : fileName)
         try fm.moveItem(at: temp, to: archive)
 
-        progress("İmza doğrulanıyor…")
+        progress(String(localized: "Verifying signature…"))
         try verifyEdSignature(archive: archive, signature: item.edSignature, publicKey: app.sparklePublicEDKey)
 
         if ["pkg", "mpkg"].contains(archive.pathExtension.lowercased()) {
@@ -65,17 +65,17 @@ enum SparkleInstaller {
             throw InstallError.handedOffToInstaller
         }
 
-        progress("Açılıyor…")
+        progress(String(localized: "Extracting…"))
         let extracted = work.appendingPathComponent("extracted", isDirectory: true)
         try fm.createDirectory(at: extracted, withIntermediateDirectories: true)
         try await extract(archive, to: extracted)
 
         guard let newApp = findApp(bundleID: app.bundleID, in: extracted) else { throw InstallError.appNotFoundInArchive }
 
-        progress("Kod imzası kontrol ediliyor…")
+        progress(String(localized: "Checking code signature…"))
         try await verifyCodeSignature(newApp: newApp, oldApp: app.url)
 
-        progress("Kuruluyor…")
+        progress(String(localized: "Installing…"))
         let wasRunning = try await quitIfRunning(bundleID: app.bundleID, path: app.url)
         try replace(app.url, with: newApp)
         if wasRunning {
