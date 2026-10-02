@@ -8,8 +8,8 @@ options:
   developmentLanguage: en
 settings:
   base:
-    MARKETING_VERSION: 0.3.0
-    CURRENT_PROJECT_VERSION: 4
+    MARKETING_VERSION: 0.4.0
+    CURRENT_PROJECT_VERSION: 5
     SWIFT_VERSION: "6.0"
     # Yerel çalıştırma için ad-hoc imza ("Sign to Run Locally"). Dağıtım için Developer ID gerekir.
     CODE_SIGN_STYLE: Manual
