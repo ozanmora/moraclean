@@ -14,7 +14,7 @@ bulur ve tek tek ya da toplu olarak günceller. Hesap, abonelik, telemetri ya da
 İndirilen dosyanın bütünlüğünü sürüm notlarındaki SHA-256 değeriyle karşılaştırabilirsiniz:
 
 ```bash
-shasum -a 256 MoraClean-0.1.0.zip
+shasum -a 256 MoraClean-<sürüm>.zip
 ```
 
 ## Özellikler
@@ -131,6 +131,10 @@ MoraClean/
 MoraCleanTests/
 tools/make-icon.swift   Uygulama ikonunu üretir (geometrik çizim)
 ```
+
+## Lisans
+
+[MIT](LICENSE) © 2026 Ozan Mora
 
 ## Marka notu
 
