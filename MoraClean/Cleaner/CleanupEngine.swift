@@ -29,7 +29,7 @@ enum CleanupError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case let .outsideAllowedRoot(path): "Güvenlik: \(path) izin verilen bir klasörün doğrudan alt öğesi değil."
+        case let .outsideAllowedRoot(path): String(localized: "Safety check: \(path) is not a direct child of an allowed folder.")
         }
     }
 }

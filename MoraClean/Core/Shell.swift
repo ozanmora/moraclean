@@ -22,7 +22,7 @@ enum ShellError: LocalizedError {
         switch self {
         case let .failed(command, result):
             let summary = result.failureSummary
-            return summary.isEmpty ? "\(command) başarısız oldu (çıkış kodu \(result.status))." : summary
+            return summary.isEmpty ? String(localized: "\(command) failed (exit code \(result.status)).") : summary
         }
     }
 }

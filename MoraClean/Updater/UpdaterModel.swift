@@ -5,7 +5,7 @@ enum UpdateSourceKind: String, Sendable {
     case homebrew = "Homebrew"
     case appStore = "App Store"
     case sparkle = "Sparkle"
-    case none = "Kaynak yok"
+    case none = "None"
 }
 
 struct PendingUpdate: Sendable, Equatable {
@@ -102,7 +102,7 @@ final class UpdaterModel {
             statusText = ""
         }
 
-        statusText = "Uygulamalar listeleniyor…"
+        statusText = String(localized: "Listing apps…")
         let apps = await AppInventory.scan()
         entries = apps.map { UpdateEntry(app: $0) }
         selectedIDs = []
@@ -110,16 +110,16 @@ final class UpdaterModel {
         var caskByPath: [String: HomebrewCask] = [:]
         if Homebrew.isAvailable {
             if updateHomebrew {
-                statusText = "Homebrew tanımları güncelleniyor (brew update)…"
+                statusText = String(localized: "Updating Homebrew definitions (brew update)…")
                 try? await Homebrew.update()
             }
-            statusText = "Homebrew cask'ları okunuyor…"
+            statusText = String(localized: "Reading Homebrew casks…")
             for cask in (try? await Homebrew.installedCasks()) ?? [] {
                 cask.appPaths.forEach { caskByPath[$0] = cask }
             }
         }
 
-        statusText = "App Store kontrol ediliyor…"
+        statusText = String(localized: "Checking the App Store…")
         let storeIDs = apps.filter(\.isFromAppStore).map(\.bundleID)
         let listings = storeIDs.isEmpty ? [:] : ((try? await AppStore.lookup(bundleIDs: storeIDs)) ?? [:])
 
@@ -143,7 +143,7 @@ final class UpdaterModel {
                         entries[index].state = .upToDate
                     }
                 } else {
-                    entries[index].state = .checkFailed("App Store'da bulunamadı")
+                    entries[index].state = .checkFailed(String(localized: "Not found on the App Store"))
                 }
             } else if app.sparkleFeedURL != nil {
                 entries[index].source = .sparkle
@@ -152,7 +152,7 @@ final class UpdaterModel {
             }
         }
 
-        statusText = "Sparkle güncelleme akışları kontrol ediliyor…"
+        statusText = String(localized: "Checking Sparkle update feeds…")
         await checkSparkleFeeds()
 
         selectedIDs = Set(available.map(\.id))
@@ -218,7 +218,7 @@ final class UpdaterModel {
     private func updateOne(_ id: String) async {
         guard let index = entries.firstIndex(where: { $0.id == id }), let pending = entries[index].pending else { return }
         let app = entries[index].app
-        setState(id, .updating("Başlıyor…"))
+        setState(id, .updating(String(localized: "Starting…")))
         let progress: @Sendable (String) -> Void = { [weak self] line in
             Task { @MainActor in self?.setProgress(id, line) }
         }
@@ -229,7 +229,7 @@ final class UpdaterModel {
             case let .appStore(trackID):
                 let done = await AppStore.update(trackID: trackID, onLine: progress)
                 if !done {
-                    setState(id, .handedOff("App Store'da açıldı; güncellemeyi oradan tamamlayın."))
+                    setState(id, .handedOff(String(localized: "Opened in the App Store; finish the update there.")))
                     return
                 }
             case let .sparkle(item):

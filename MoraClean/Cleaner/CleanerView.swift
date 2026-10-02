@@ -19,30 +19,31 @@ struct CleanerView: View {
             Divider()
             footer
         }
-        .navigationTitle("Temizlik")
+        .navigationTitle("Cleanup")
         .confirmationDialog(
-            "\(Bytes.format(model.selectedSize)) temizlensin mi?",
+            "Clean up \(Bytes.format(model.selectedSize))?",
             isPresented: $confirmClean,
             titleVisibility: .visible
         ) {
-            Button(permanentDelete ? "Kalıcı Olarak Sil" : "Çöp Kutusuna Taşı", role: .destructive) {
+            Button(permanentDelete ? "Delete Permanently" : "Move to Trash", role: .destructive) {
                 Task { await model.clean(permanentDelete: permanentDelete) }
             }
-            Button("Vazgeç", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
             Text(confirmMessage)
         }
     }
 
     private var confirmMessage: String {
-        var text = permanentDelete
-            ? "Seçilen \(model.selectedItems.count) öğe kalıcı olarak silinecek. Bu işlem geri alınamaz."
-            : "Seçilen \(model.selectedItems.count) öğe Çöp Kutusuna taşınacak. Alan, Çöp Kutusu boşaltılınca açılır."
+        let count = model.selectedItems.count
+        var lines = [permanentDelete
+            ? String(localized: "\(count) selected items will be deleted permanently. This cannot be undone.")
+            : String(localized: "\(count) selected items will be moved to the Trash. The space is freed when you empty the Trash.")]
         if model.selectedItems.contains(where: { $0.root.lastPathComponent == ".Trash" }) {
-            text += "\nÇöp Kutusu'ndaki öğeler her durumda kalıcı olarak silinir."
+            lines.append(String(localized: "Items already in the Trash are always deleted permanently."))
         }
-        text += "\nTemizlemeden önce açık uygulamaları kapatmanız önerilir."
-        return text
+        lines.append(String(localized: "Quitting open apps before cleaning up is recommended."))
+        return lines.joined(separator: "\n")
     }
 
     private var header: some View {
@@ -53,7 +54,7 @@ struct CleanerView: View {
                 .frame(width: 64, height: 64)
                 .background(LinearGradient(colors: [.pink, .orange], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 16))
             VStack(alignment: .leading, spacing: 4) {
-                Text("Sistem Temizliği").font(.title2.bold())
+                Text("System Cleanup").font(.title2.bold())
                 Text(statusText).foregroundStyle(.secondary)
             }
             Spacer()
@@ -61,7 +62,7 @@ struct CleanerView: View {
             Button {
                 Task { await model.scan() }
             } label: {
-                Label(model.results.isEmpty ? "Tara" : "Yeniden Tara", systemImage: "magnifyingglass")
+                Label(model.results.isEmpty ? "Scan" : "Scan Again", systemImage: "magnifyingglass")
             }
             .controlSize(.large)
             .disabled(model.isBusy)
@@ -71,25 +72,27 @@ struct CleanerView: View {
 
     private var statusText: String {
         switch model.phase {
-        case .scanning: return "Taranıyor…"
-        case .cleaning: return "Temizleniyor…"
+        case .scanning: return String(localized: "Scanning…")
+        case .cleaning: return String(localized: "Cleaning up…")
         case .idle, .ready:
             if let report = model.lastReport {
-                var text = "\(Bytes.format(report.freedBytes)) temizlendi (\(report.removedCount) öğe)."
-                if !report.failures.isEmpty { text += " \(report.failures.count) öğe silinemedi." }
+                var text = String(localized: "Cleaned up \(Bytes.format(report.freedBytes)). Items removed: \(report.removedCount).")
+                if !report.failures.isEmpty { text += " " + String(localized: "\(report.failures.count) items could not be deleted.") }
                 return text
             }
-            return model.results.isEmpty ? "Önbellek, günlük ve gereksiz dosyaları bulmak için tarayın." : "\(Bytes.format(model.totalFound)) gereksiz dosya bulundu."
+            return model.results.isEmpty
+                ? String(localized: "Scan to find caches, logs and other unneeded files.")
+                : String(localized: "Found \(Bytes.format(model.totalFound)) of unneeded files.")
         }
     }
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("Henüz tarama yapılmadı", systemImage: "sparkles")
+            Label("No scan yet", systemImage: "sparkles")
         } description: {
-            Text("Tarama yalnızca okur; hiçbir şey siz onaylamadan silinmez.")
+            Text("Scanning only reads. Nothing is deleted until you confirm.")
         } actions: {
-            Button("Taramayı Başlat") { Task { await model.scan() } }
+            Button("Start Scan") { Task { await model.scan() } }
                 .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -111,7 +114,7 @@ struct CleanerView: View {
     private var categoryList: some View {
         List {
             if let report = model.lastReport, !report.failures.isEmpty {
-                DisclosureGroup("\(report.failures.count) öğe silinemedi") {
+                DisclosureGroup("\(report.failures.count) items could not be deleted") {
                     ForEach(report.failures.prefix(50), id: \.path) { failure in
                         VStack(alignment: .leading) {
                             Text(failure.path).font(.caption.monospaced()).lineLimit(1).truncationMode(.middle)
@@ -138,15 +141,15 @@ struct CleanerView: View {
     private var footer: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Seçili: \(Bytes.format(model.selectedSize))").font(.headline)
-                Text(permanentDelete ? "Mod: kalıcı silme" : "Mod: Çöp Kutusuna taşı")
+                Text("Selected: \(Bytes.format(model.selectedSize))").font(.headline)
+                Text(permanentDelete ? "Mode: delete permanently" : "Mode: move to Trash")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
             if let available = DiskSpace.available() {
-                Text("Boş alan: \(Bytes.format(available))").foregroundStyle(.secondary)
+                Text("Available: \(Bytes.format(available))").foregroundStyle(.secondary)
             }
-            Button("Temizle") { confirmClean = true }
+            Button("Clean Up") { confirmClean = true }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .disabled(model.isBusy || model.selectedItemIDs.isEmpty)
@@ -167,16 +170,16 @@ private struct CategoryRow: View {
         DisclosureGroup(isExpanded: $isExpanded) {
             if items.isEmpty {
                 if let roots = model.results[category.id]?.inaccessibleRoots, !roots.isEmpty {
-                    Text("Okunamadı: \(roots.map(\.path).joined(separator: ", ")). Tam Disk Erişimi izni verin.").font(.caption).foregroundStyle(.secondary)
+                    Text("Could not read: \(roots.map(\.path).joined(separator: ", ")). Grant Full Disk Access.").font(.caption).foregroundStyle(.secondary)
                 } else {
-                    Text(scanned ? "Temizlenecek bir şey yok." : "Taranıyor…").foregroundStyle(.secondary)
+                    Text(scanned ? "Nothing to clean up." : "Scanning…").foregroundStyle(.secondary)
                 }
             } else {
                 ForEach(items.prefix(300)) { item in
                     ItemRow(item: item)
                 }
                 if items.count > 300 {
-                    Text("ve \(items.count - 300) öğe daha (kategori seçimi hepsini kapsar)").font(.caption).foregroundStyle(.secondary)
+                    Text("and \(items.count - 300) more items (selecting the category includes all of them)").font(.caption).foregroundStyle(.secondary)
                 }
             }
         } label: {
@@ -198,7 +201,7 @@ private struct CategoryRow: View {
                 }
                 Spacer()
                 if let result = model.results[category.id], items.isEmpty, !result.inaccessibleRoots.isEmpty {
-                    Label("İzin gerekli", systemImage: "lock.fill")
+                    Label("Permission required", systemImage: "lock.fill")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.orange)
                         .help(result.inaccessibleRoots.map(\.path).joined(separator: "\n"))
@@ -206,9 +209,9 @@ private struct CategoryRow: View {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(Bytes.format(model.results[category.id]?.totalSize ?? 0)).font(.headline.monospacedDigit())
                         if model.selectionState(of: category.id) == nil {
-                            Text("\(Bytes.format(model.selectedSize(in: category.id))) seçili").font(.caption).foregroundStyle(.secondary)
+                            Text("\(Bytes.format(model.selectedSize(in: category.id))) selected").font(.caption).foregroundStyle(.secondary)
                         } else {
-                            Text("\(items.count) öğe").font(.caption).foregroundStyle(.secondary)
+                            Text("\(items.count) items").font(.caption).foregroundStyle(.secondary)
                         }
                     }
                 } else if model.phase == .scanning {
@@ -245,7 +248,7 @@ private struct ItemRow: View {
                 Image(systemName: "magnifyingglass.circle")
             }
             .buttonStyle(.borderless)
-            .help("Finder'da göster")
+            .help("Show in Finder")
         }
     }
 }
@@ -255,12 +258,12 @@ struct FullDiskAccessBanner: View {
         HStack(spacing: 12) {
             Image(systemName: "lock.shield").font(.title2).foregroundStyle(.orange)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Bazı klasörler okunamadı").font(.headline)
-                Text("Çöp Kutusu gibi korunan alanlar için Sistem Ayarları > Gizlilik ve Güvenlik > Tam Disk Erişimi'nden MoraClean'e izin verin, ardından uygulamayı yeniden başlatın.")
+                Text("Some folders could not be read").font(.headline)
+                Text("For protected locations such as the Trash, allow MoraClean in System Settings > Privacy & Security > Full Disk Access, then restart the app.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Ayarları Aç") {
+            Button("Open Settings") {
                 if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
                     NSWorkspace.shared.open(url)
                 }
