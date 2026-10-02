@@ -1,0 +1,60 @@
+# XcodeGen tanımı. `xcodegen generate` komutu bu dosyadan MoraClean.xcodeproj üretir.
+name: MoraClean
+options:
+  bundleIdPrefix: works.mora
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: 0.1.0
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_VERSION: "6.0"
+    # Yerel çalıştırma için ad-hoc imza ("Sign to Run Locally"). Dağıtım için Developer ID gerekir.
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+  configs:
+    Release:
+      # Dağıtılan ikili dosyadan hata ayıklama sembollerini (yerel derleme yolları dahil) çıkar.
+      DEPLOYMENT_POSTPROCESSING: YES
+      STRIP_INSTALLED_PRODUCT: YES
+      STRIP_STYLE: all
+      COPY_PHASE_STRIP: YES
+targets:
+  MoraClean:
+    type: application
+    platform: macOS
+    sources:
+      - MoraClean
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: works.mora.moraclean
+        PRODUCT_NAME: MoraClean
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: MoraClean
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Ozan Mora"
+        # Önbellek klasörlerine ve /Applications'a erişmek için sandbox kapalı.
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  MoraCleanTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - MoraCleanTests
+    dependencies:
+      - target: MoraClean
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: works.mora.moraclean.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  MoraClean:
+    build:
+      targets:
+        MoraClean: all
+        MoraCleanTests: [test]
+    test:
+      targets:
+        - MoraCleanTests
