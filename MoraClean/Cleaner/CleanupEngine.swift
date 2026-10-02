@@ -5,6 +5,7 @@ struct CleanupItem: Identifiable, Sendable, Hashable {
     let url: URL
     let root: URL
     let size: Int64
+    var isDirectory = false
 
     var name: String { url.lastPathComponent }
 }
@@ -14,6 +15,8 @@ struct CategoryScanResult: Sendable {
     let items: [CleanupItem]
     /// Okunamayan kökler (çoğunlukla Tam Disk Erişimi izni gerektirir).
     let inaccessibleRoots: [URL]
+    /// `groupsByApp` kategorilerde uygulamalara göre gruplar; diğerlerinde `nil`.
+    var groups: [CleanupGroup]? = nil
 
     var totalSize: Int64 { items.reduce(0) { $0 + $1.size } }
 }
@@ -57,11 +60,14 @@ enum CleanupEngine {
                     if target.excludedNames.contains(name) || name == ".DS_Store" || name == ".localized" { continue }
                     if !target.extensions.isEmpty, !target.extensions.contains(child.pathExtension.lowercased()) { continue }
                     let size = allocatedSize(of: child)
-                    items.append(CleanupItem(url: child, root: target.root, size: size))
+                    let values = try? child.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+                    let isDirectory = values?.isDirectory == true && values?.isSymbolicLink != true
+                    items.append(CleanupItem(url: child, root: target.root, size: size, isDirectory: isDirectory))
                 }
             }
             items.sort { $0.size > $1.size }
-            return CategoryScanResult(categoryID: category.id, items: items, inaccessibleRoots: inaccessible)
+            let groups = category.groupsByApp ? AppMatcher.group(items) : nil
+            return CategoryScanResult(categoryID: category.id, items: items, inaccessibleRoots: inaccessible, groups: groups)
         }.value
     }
 

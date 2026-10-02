@@ -22,6 +22,8 @@ struct CleanupCategory: Identifiable, Sendable {
     /// Çöp Kutusu gibi, ayardan bağımsız olarak her zaman kalıcı silinen kategoriler.
     let alwaysPermanent: Bool
     let targets: [CleanupTarget]
+    /// Öğeler ait oldukları uygulamaya göre gruplanır (ikon ve uygulama adıyla).
+    var groupsByApp = false
 }
 
 extension CleanupCategory {
@@ -38,7 +40,8 @@ extension CleanupCategory {
                 symbol: "internaldrive",
                 selectedByDefault: true,
                 alwaysPermanent: false,
-                targets: [CleanupTarget(root: library.appendingPathComponent("Caches"), excludedNames: [ownBundleID])]
+                targets: [CleanupTarget(root: library.appendingPathComponent("Caches"), excludedNames: [ownBundleID])],
+                groupsByApp: true
             ),
             CleanupCategory(
                 id: .userLogs,

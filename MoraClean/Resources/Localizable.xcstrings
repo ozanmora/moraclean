@@ -457,6 +457,16 @@
         }
       }
     },
+    "Empty folder": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boş klasör"
+          }
+        }
+      }
+    },
     "Extracting…": {
       "localizations": {
         "tr": {
@@ -613,6 +623,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uygulamalar listeleniyor…"
+          }
+        }
+      }
+    },
+    "Loading…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yükleniyor…"
           }
         }
       }
