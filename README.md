@@ -53,6 +53,8 @@ Notes:
 | Trash | `~/.Trash` (always deleted permanently) | not selected |
 | Installer files | `.dmg .pkg .mpkg .xip` files in `~/Downloads` | not selected |
 
+- Each category opens as an accordion. User caches are grouped by app, with the app's icon and name; you can browse
+  any folder as a tree to see what takes up space.
 - Scanning only reads. Nothing is deleted until you confirm.
 - By default, files are **moved to the Trash**, so you can undo. You can switch to permanent deletion in Settings.
 - The app can only delete the **direct children** of the folders above. Any other path is rejected in code.
