@@ -2,6 +2,13 @@
 
 Biçim [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/), sürümleme [SemVer](https://semver.org/lang/tr/).
 
+## [0.4.0] - 2026-10-02
+
+### Eklendi
+- Destek bağlantıları: uygulama menüsünde *GitHub'da Sponsor Ol…* ve *Buy Me a Coffee…*, Ayarlar'da *MoraClean'i Destekle*
+  bölümü. Bağlantılar yalnızca tıklanınca tarayıcıda açılır.
+- README'ye destek bölümü.
+
 ## [0.3.0] - 2026-10-02
 
 ### Değişti

@@ -105,6 +105,9 @@ The app only goes online when you click **Scan** or **Update**:
 
 No usage data, device information or personal data is sent anywhere.
 
+The *Sponsor on GitHub* and *Buy Me a Coffee* links in the app menu and in Settings only open your browser when you
+click them.
+
 ### File system and other actions
 
 - **Reads:** the folders in the cleanup table, and the `Info.plist` files of apps in `/Applications` and
@@ -156,6 +159,13 @@ MoraClean/
 MoraCleanTests/
 tools/make-icon.swift   Generates the app icon (geometric drawing)
 ```
+
+## Support
+
+MoraClean is free and open source. If it saves you time, you can support its development:
+
+- [GitHub Sponsors](https://github.com/sponsors/ozanmora)
+- [Buy Me a Coffee](https://buymeacoffee.com/ozanmora)
 
 ## License
 

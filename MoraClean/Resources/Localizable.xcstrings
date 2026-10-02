@@ -247,6 +247,26 @@
         }
       }
     },
+    "Buy Me a Coffee": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy Me a Coffee"
+          }
+        }
+      }
+    },
+    "Buy Me a Coffee…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy Me a Coffee…"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "tr": {
@@ -667,6 +687,16 @@
         }
       }
     },
+    "MoraClean is free and open source. If it saves you time, you can support its development.": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MoraClean ücretsiz ve açık kaynaklıdır. İşinize yarıyorsa geliştirilmesine destek olabilirsiniz."
+          }
+        }
+      }
+    },
     "MoraClean needs your administrator password to install this update.": {
       "localizations": {
         "tr": {
@@ -937,6 +967,26 @@
         }
       }
     },
+    "Sponsor on GitHub": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub'da Sponsor Ol"
+          }
+        }
+      }
+    },
+    "Sponsor on GitHub…": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub'da Sponsor Ol…"
+          }
+        }
+      }
+    },
     "Start Scan": {
       "localizations": {
         "tr": {
@@ -973,6 +1023,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yoksaymayı Kaldır"
+          }
+        }
+      }
+    },
+    "Support MoraClean": {
+      "localizations": {
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MoraClean'i Destekle"
           }
         }
       }
